@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useRef } from 'react';
@@ -24,25 +25,24 @@ export default function PomoZenPage() {
     timeLeft,
     workDuration,
     shortBreakDuration,
-    longBreakDuration
+    longBreakDuration,
+    startTimer,
+    pauseTimer
   } = usePomodoroStore();
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const { toast } = useToast();
-  const firstRender = useRef(true); // To prevent effects on initial mount for certain conditions
+  const firstRender = useRef(true); 
 
-  // Initialize daily stats on component mount
   useEffect(() => {
     _initializeDailyStats();
   }, [_initializeDailyStats]);
 
-  // Timer interval effect
   useEffect(() => {
     if (isRunning) {
       timerRef.current = setInterval(() => {
         const { playSound, showNotification, notificationMessage } = tick();
         if (playSound) {
-          console.log("Sound notification!"); // Placeholder for actual sound
-          // Example: new Audio('/path/to/sound.mp3').play();
+          console.log("Sound notification!"); 
         }
         if (showNotification && notificationMessage) {
           if (typeof window !== "undefined" && notificationsEnabled) {
@@ -53,13 +53,13 @@ export default function PomoZenPage() {
                 if (permission === "granted") {
                   new Notification("PomoZen", { body: notificationMessage });
                 } else {
-                  alert(`PomoZen: ${notificationMessage}`); // Fallback for permission not granted
+                  alert(`PomoZen: ${notificationMessage}`); 
                 }
               });
             } else {
-               alert(`PomoZen: ${notificationMessage}`); // Fallback for permission denied
+               alert(`PomoZen: ${notificationMessage}`); 
             }
-          } else if (notificationsEnabled) { // Fallback if Notification API not available or explicitly disabled store-wise
+          } else if (notificationsEnabled) { 
              alert(`PomoZen: ${notificationMessage}`);
           }
            toast({
@@ -80,7 +80,6 @@ export default function PomoZenPage() {
     };
   }, [isRunning, tick, notificationsEnabled, soundEnabled, toast]);
 
-  // Update document title with time left
   useEffect(() => {
     if (typeof window !== "undefined") {
       const modeText = currentMode === 'work' ? 'Work' : currentMode === 'shortBreak' ? 'Short Break' : 'Long Break';
@@ -91,19 +90,33 @@ export default function PomoZenPage() {
     }
   }, [timeLeft, currentMode]);
 
-  // Request notification permission on load if not already set
    useEffect(() => {
-    if (firstRender.current) { // Only run on first effective render
+    if (firstRender.current) { 
       if (typeof window !== "undefined" && "Notification" in window) {
         if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-          // Optional: Prompt user to enable notifications if they are enabled in settings
-          // For now, let's not be too intrusive. Permission will be asked on first notification.
-          // Notification.requestPermission(); 
         }
       }
       firstRender.current = false;
     }
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === ' ' || event.code === 'Space') {
+        event.preventDefault(); // Prevent scrolling when space is pressed
+        if (isRunning) {
+          pauseTimer();
+        } else {
+          startTimer();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isRunning, startTimer, pauseTimer]);
 
 
   return (
