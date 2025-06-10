@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useRef } from 'react';
@@ -102,8 +101,12 @@ export default function PomoZenPage() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
       if (event.key === ' ' || event.code === 'Space') {
-        event.preventDefault(); // Prevent scrolling when space is pressed
+        event.preventDefault();
         if (isRunning) {
           pauseTimer();
         } else {
