@@ -8,7 +8,7 @@ export function TimerDisplay() {
 
   return (
     <div className="text-center">
-      <p className="text-8xl font-bold font-mono text-primary tabular-nums" aria-label="Time remaining">
+      <p className="text-8xl font-bold font-mono text-timerNumber tabular-nums" aria-label="Time remaining">
         {formatTime(timeLeft)}
       </p>
     </div>
